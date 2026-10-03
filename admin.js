@@ -1,9 +1,26 @@
-document.addEventListener("DOMContentLoaded", async () => {
-  // 1. Verileri Yükle
-  loadCompanies();
-  loadAnnouncements();
+// Supabase İstemcisi Hazır mı Kontrol Et
+function getSupabase() {
+  if (typeof supabaseApp !== 'undefined') return supabaseApp;
+  if (typeof supabase !== 'undefined' && typeof SUPABASE_URL !== 'undefined') {
+    return supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  }
+  console.error("Supabase istemcisi bulunamadı! config.js dosyasını kontrol edin.");
+  return null;
+}
 
-  // 2. Şirket Ekleme Formu
+document.addEventListener("DOMContentLoaded", async () => {
+  const client = getSupabase();
+
+  if (!client) {
+    alert("Supabase bağlantısı kurulamadı! Lütfen config.js dosyanızı kontrol edin.");
+    return;
+  }
+
+  // Verileri Yükle
+  loadCompanies(client);
+  loadAnnouncements(client);
+
+  // Şirket Ekleme Formu
   const companyForm = document.getElementById('company-form');
   if (companyForm) {
     companyForm.addEventListener('submit', async (e) => {
@@ -20,18 +37,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       try {
         // A. Kullanıcı Kaydı (Auth)
-        const { data: authData, error: authError } = await supabaseApp.auth.signUp({
+        const { data: authData, error: authError } = await client.auth.signUp({
           email: email,
           password: password,
-          options: {
-            data: { full_name: fullName }
-          }
+          options: { data: { full_name: fullName } }
         });
 
         if (authError) throw authError;
 
         // B. Şirket Kaydı
-        const { data: companyData, error: companyError } = await supabaseApp
+        const { data: companyData, error: companyError } = await client
           .from('companies')
           .insert([{ name: name, status: 'active' }])
           .select()
@@ -39,9 +54,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (companyError) throw companyError;
 
-        // C. Profil Eşleştirme
+        // C. Profil Kaydı
         if (authData.user) {
-          await supabaseApp
+          await client
             .from('profiles')
             .upsert({
               id: authData.user.id,
@@ -53,11 +68,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         alert("Şirket ve kullanıcı başarıyla eklendi!");
         companyForm.reset();
-        loadCompanies();
+        loadCompanies(client);
 
       } catch (err) {
-        console.error("Hata:", err);
-        alert("Hata: " + (err.message || "İşlem yapılamadı."));
+        console.error("Şirket Ekleme Hatası:", err);
+        alert("Hata: " + (err.message || "İşlem başarısız."));
       } finally {
         btn.innerText = "Hesap Oluştur ve Şirketi Kaydet";
         btn.disabled = false;
@@ -65,7 +80,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // 3. Duyuru Ekleme Formu
+  // Duyuru Ekleme Formu
   const announcementForm = document.getElementById('announcement-form');
   if (announcementForm) {
     announcementForm.addEventListener('submit', async (e) => {
@@ -75,7 +90,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const content = document.getElementById('announcement-content').value.trim();
 
       try {
-        const { error } = await supabaseApp
+        const { error } = await client
           .from('announcements')
           .insert([{ title, content, is_active: true }]);
 
@@ -83,9 +98,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         alert("Duyuru başarıyla yayınlandı!");
         announcementForm.reset();
-        loadAnnouncements();
+        loadAnnouncements(client);
 
       } catch (err) {
+        console.error("Duyuru Ekleme Hatası:", err);
         alert("Duyuru Hatası: " + err.message);
       }
     });
@@ -93,12 +109,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 // Şirketleri Getir
-async function loadCompanies() {
+async function loadCompanies(client) {
   const listEl = document.getElementById('companies-list');
   if (!listEl) return;
 
   try {
-    const { data: companies, error } = await supabaseApp
+    const { data: companies, error } = await client
       .from('companies')
       .select('*')
       .order('created_at', { ascending: false });
@@ -128,17 +144,18 @@ async function loadCompanies() {
     `).join('');
 
   } catch (err) {
-    listEl.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-rose-400">Veri çekilemedi.</td></tr>`;
+    console.error("Şirket Yükleme Hatası:", err);
+    listEl.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-rose-400">Veriler çekilemedi (RLS/Erişim Hatası).</td></tr>`;
   }
 }
 
 // Duyuruları Getir
-async function loadAnnouncements() {
+async function loadAnnouncements(client) {
   const listEl = document.getElementById('announcements-list');
   if (!listEl) return;
 
   try {
-    const { data: announcements, error } = await supabaseApp
+    const { data: announcements, error } = await client
       .from('announcements')
       .select('*')
       .order('created_at', { ascending: false });
@@ -162,27 +179,31 @@ async function loadAnnouncements() {
     `).join('');
 
   } catch (err) {
-    console.error(err);
+    console.error("Duyuru Yükleme Hatası:", err);
+    listEl.innerHTML = `<p class="text-rose-400 text-center py-4 text-xs">Duyurular yüklenemedi (RLS/Erişim Hatası).</p>`;
   }
 }
 
 // Şirket Durumu Değiştir
 async function toggleCompanyStatus(id, currentStatus) {
+  const client = getSupabase();
   const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
-  const { error } = await supabaseApp.from('companies').update({ status: newStatus }).eq('id', id);
-  if (!error) loadCompanies();
+  const { error } = await client.from('companies').update({ status: newStatus }).eq('id', id);
+  if (!error) loadCompanies(client);
 }
 
 // Duyuru Sil
 async function deleteAnnouncement(id) {
+  const client = getSupabase();
   if (confirm("Bu duyuru silinsin mi?")) {
-    const { error } = await supabaseApp.from('announcements').delete().eq('id', id);
-    if (!error) loadAnnouncements();
+    const { error } = await client.from('announcements').delete().eq('id', id);
+    if (!error) loadAnnouncements(client);
   }
 }
 
 // Çıkış Yap
 async function logout() {
-  await supabaseApp.auth.signOut();
+  const client = getSupabase();
+  if (client) await client.auth.signOut();
   window.location.href = "index.html";
 }
