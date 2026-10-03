@@ -5,135 +5,102 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FSHesap - Süper Admin Paneli</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Supabase Kütüphanesi -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Konfigürasyon ve Scriptler (defer eklendi) -->
-  <script src="config.js" defer></script>
-  <script src="admin.js" defer></script>
 </head>
 <body class="bg-gray-900 text-gray-100 font-sans min-h-screen">
 
-  <!-- Üst Bar -->
   <header class="bg-gray-800 border-b border-gray-700 px-6 py-4 flex justify-between items-center">
     <div class="flex items-center gap-3">
-      <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center font-bold text-lg shadow-lg">FS</div>
-      <div>
-        <h1 class="text-lg font-bold">FSHesap Yönetici Paneli</h1>
-        <p class="text-xs text-gray-400">Şirket ve Kullanıcı Yönetim Merkezi</p>
-      </div>
+      <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center font-bold text-lg text-white">FS</div>
+      <h1 class="text-lg font-bold">FSHesap - Admin Yönetimi</h1>
     </div>
     <button onclick="logout()" class="text-xs bg-red-600/20 hover:bg-red-600/40 text-red-400 px-4 py-2 rounded-lg transition">Güvenli Çıkış</button>
   </header>
 
   <main class="p-6 max-w-7xl mx-auto space-y-8">
-
-    <!-- İSTATİSTİK ÖZETİ -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div class="bg-gray-800 border border-gray-700 p-5 rounded-2xl">
-        <p class="text-xs text-gray-400 uppercase font-semibold">Toplam Şirket</p>
-        <p id="total-companies" class="text-3xl font-extrabold text-blue-400 mt-2">0</p>
-      </div>
-      <div class="bg-gray-800 border border-gray-700 p-5 rounded-2xl">
-        <p class="text-xs text-gray-400 uppercase font-semibold">Aktif Müşteriler</p>
-        <p id="active-companies" class="text-3xl font-extrabold text-emerald-400 mt-2">0</p>
-      </div>
-      <div class="bg-gray-800 border border-gray-700 p-5 rounded-2xl">
-        <p class="text-xs text-gray-400 uppercase font-semibold">Pasif / Dondurulan</p>
-        <p id="passive-companies" class="text-3xl font-extrabold text-rose-400 mt-2">0</p>
-      </div>
-    </div>
-
-    <!-- İŞLEM SEKMELERİ -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
       
-      <!-- SOL EKRAN: Yeni Şirket & Kullanıcı Ekleme Formu -->
-      <div class="bg-gray-800 border border-gray-700 p-6 rounded-2xl space-y-5">
-        <h2 class="text-lg font-bold text-white border-b border-gray-700 pb-3">Yeni Şirket Tanımla</h2>
-        
-        <form id="create-company-form" class="space-y-4">
+      <!-- ŞİRKET EKLEME FORMU -->
+      <div class="bg-gray-800 border border-gray-700 p-6 rounded-2xl space-y-4">
+        <h2 class="text-base font-bold text-white border-b border-gray-700 pb-3">Yeni Şirket / Müşteri Tanımla</h2>
+        <form id="company-form" class="space-y-4">
           <div>
             <label class="block text-xs font-medium text-gray-400 mb-1">Şirket / İşletme Adı</label>
-            <input type="text" id="comp-name" required placeholder="Örn: Adana Mobilya" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500">
+            <input type="text" id="company-name" required placeholder="Örn: Bahar Mefruşat" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2.5 text-sm">
           </div>
-
           <div>
-            <label class="block text-xs font-medium text-gray-400 mb-1">Yetkili / Ad Soyad</label>
-            <input type="text" id="owner-name" required placeholder="Örn: Ahmet Yılmaz" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500">
+            <label class="block text-xs font-medium text-gray-400 mb-1">Yetkili Ad Soyad</label>
+            <input type="text" id="company-user-name" required placeholder="Örn: Salih BAKAR" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2.5 text-sm">
           </div>
-
           <div>
             <label class="block text-xs font-medium text-gray-400 mb-1">E-Posta (Giriş İçin)</label>
-            <input type="email" id="owner-email" required placeholder="ahmet@adanamobilya.com" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500">
+            <input type="email" id="company-email" required placeholder="salihbakar@baharmefrusat.com" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2.5 text-sm">
           </div>
-
           <div>
             <label class="block text-xs font-medium text-gray-400 mb-1">Şifre</label>
-            <input type="password" id="owner-pass" required placeholder="••••••••" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500">
+            <input type="password" id="company-password" required placeholder="••••••••" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2.5 text-sm">
           </div>
-
-          <div>
-            <label class="block text-xs font-medium text-gray-400 mb-1">Kullanıcı Rolü</label>
-            <select id="user-role" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500">
-              <option value="company_owner">Şirket Sahibi (Tam Yetki)</option>
-              <option value="staff">Personel (Sadece Gider / Kısıtlı)</option>
-            </select>
-          </div>
-
-          <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 rounded-xl transition shadow-lg shadow-blue-600/30 text-sm">
-            Şirketi & Hesabı Oluştur
+          <button type="submit" id="company-submit-btn" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 rounded-xl text-sm transition">
+            Hesap Oluştur ve Şirketi Kaydet
           </button>
         </form>
       </div>
 
-      <!-- SAĞ EKRAN: Mevcut Şirketler Listesi -->
-      <div class="lg:col-span-2 bg-gray-800 border border-gray-700 p-6 rounded-2xl space-y-4">
-        <h2 class="text-lg font-bold text-white border-b border-gray-700 pb-3">Kayıtlı Şirketler</h2>
-        
+      <!-- DUYURU EKLEME FORMU -->
+      <div class="bg-gray-800 border border-gray-700 p-6 rounded-2xl space-y-4">
+        <h2 class="text-base font-bold text-white border-b border-gray-700 pb-3">Sistem Duyurusu Yayınla</h2>
+        <form id="announcement-form" class="space-y-4">
+          <div>
+            <label class="block text-xs font-medium text-gray-400 mb-1">Duyuru Başlığı</label>
+            <input type="text" id="announcement-title" required placeholder="Örn: Sistem Bakım Çalışması" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2.5 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-400 mb-1">Duyuru İçeriği</label>
+            <textarea id="announcement-content" rows="4" required placeholder="Duyuru metnini buraya yazın..." class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2.5 text-sm"></textarea>
+          </div>
+          <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-xl text-sm transition">
+            Duyuruyu Yayınla
+          </button>
+        </form>
+      </div>
+
+    </div>
+
+    <!-- LİSTELER -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <!-- Şirketler Listesi -->
+      <div class="bg-gray-800 border border-gray-700 p-6 rounded-2xl space-y-4">
+        <h2 class="text-base font-bold text-white border-b border-gray-700 pb-3">Kayıtlı Şirketler</h2>
         <div class="overflow-x-auto">
-          <table class="w-full text-left text-sm">
-            <thead class="text-xs text-gray-400 uppercase bg-gray-900/50">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-gray-900 text-gray-400 uppercase">
               <tr>
-                <th class="p-3 rounded-l-lg">Şirket Adı</th>
+                <th class="p-3">Şirket Adı</th>
                 <th class="p-3">Durum</th>
                 <th class="p-3">Tarih</th>
-                <th class="p-3 text-right rounded-r-lg">İşlem</th>
+                <th class="p-3">İşlem</th>
               </tr>
             </thead>
-            <tbody id="company-list" class="divide-y divide-gray-700">
-              <tr>
-                <td colspan="4" class="p-4 text-center text-gray-400">Veriler yükleniyor...</td>
-              </tr>
+            <tbody id="companies-list">
+              <tr><td colspan="4" class="p-4 text-center text-gray-400">Yükleniyor...</td></tr>
             </tbody>
           </table>
         </div>
       </div>
 
-    </div>
-
-    <!-- DUYURU YAYINLAMA MODÜLÜ -->
-    <div class="bg-gray-800 border border-gray-700 p-6 rounded-2xl space-y-4">
-      <h2 class="text-lg font-bold text-white border-b border-gray-700 pb-3">Sistem Geneli Pop-Up Duyuru Yayınla</h2>
-      <form id="announcement-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="block text-xs font-medium text-gray-400 mb-1">Duyuru Başlığı</label>
-          <input type="text" id="ann-title" required placeholder="Örn: Sistem Bakımı Hakkında" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2.5 text-sm">
+      <!-- Active Duyurular -->
+      <div class="bg-gray-800 border border-gray-700 p-6 rounded-2xl space-y-4">
+        <h2 class="text-base font-bold text-white border-b border-gray-700 pb-3">Yayınlanan Duyurular</h2>
+        <div id="announcements-list" class="space-y-3">
+          <p class="text-gray-400 text-center py-4 text-xs">Yükleniyor...</p>
         </div>
-        <div>
-          <label class="block text-xs font-medium text-gray-400 mb-1">Yayın Süresi (Bitiş Tarihi)</label>
-          <input type="datetime-local" id="ann-end" required class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2.5 text-sm text-gray-300">
-        </div>
-        <div class="md:col-span-2">
-          <label class="block text-xs font-medium text-gray-400 mb-1">Duyuru Metni</label>
-          <textarea id="ann-content" rows="2" required placeholder="Kullanıcılar panellerine girdiğinde görecekleri mesaj..." class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2.5 text-sm"></textarea>
-        </div>
-        <div class="md:col-span-2">
-          <button type="submit" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-6 py-2.5 rounded-xl transition text-sm">
-            Duyuruyu Yayınla
-          </button>
-        </div>
-      </form>
+      </div>
     </div>
 
   </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="admin.js"></script>
 </body>
 </html>
