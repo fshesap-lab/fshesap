@@ -1,5 +1,4 @@
 const SUPABASE_URL = "https://jdqnjxacnwmmomvvwmxy.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpkcW5qeGFjbndtbW9tdnZ3bXh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEwNjEwMjQsImV4cCI6MjEwNjYzNzAyNH0.FBIwh-OFeX-aAMkyG346VPI47mOtuECrkQw7PgpnlLM";
 
-// Global çakışmaları önlemek için istemciyi 'supabaseClient' olarak tanımlıyoruz
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+var supabaseApp = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
