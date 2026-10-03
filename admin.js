@@ -12,52 +12,65 @@ async function loadCompanies() {
 
   if (error) {
     console.error("Şirketler çekilemedi:", error);
+    alert("Şirket listesi yüklenirken bir hata oluştu.");
     return;
   }
 
   const listElement = document.getElementById('company-list');
+  if (!listElement) return;
+
   listElement.innerHTML = '';
 
   let activeCount = 0;
   let passiveCount = 0;
 
   companies.forEach(comp => {
-    if (comp.status === 'active') activeCount++;
+    const isActive = comp.status === 'active';
+    if (isActive) activeCount++;
     else passiveCount++;
 
     const row = document.createElement('tr');
     row.className = "hover:bg-gray-700/50 transition";
     row.innerHTML = `
-      <td class="p-3 font-semibold text-white">${comp.name}</td>
+      <td class="p-3 font-semibold text-white">${escapeHtml(comp.name)}</td>
       <td class="p-3">
-        <span class="px-2.5 py-1 text-xs font-semibold rounded-full ${comp.status === 'active' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}">
-          ${comp.status === 'active' ? 'Aktif' : 'Pasif/Donduruldu'}
+        <span class="px-2.5 py-1 text-xs font-semibold rounded-full ${isActive ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}">
+          ${isActive ? 'Aktif' : 'Pasif/Donduruldu'}
         </span>
       </td>
-      <td class="p-3 text-gray-400 text-xs">${new Date(comp.created_at).toLocaleDateString('tr-TR')}</td>
+      <td class="p-3 text-gray-400 text-xs">${comp.created_at ? new Date(comp.created_at).toLocaleDateString('tr-TR') : '-'}</td>
       <td class="p-3 text-right">
-        <button onclick="toggleCompanyStatus('${comp.id}', '${comp.status}')" class="text-xs px-3 py-1.5 rounded-lg border ${comp.status === 'active' ? 'border-rose-500/50 text-rose-400 hover:bg-rose-500/10' : 'border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10'} transition">
-          ${comp.status === 'active' ? 'Erişimi Dondur' : 'Aktif Et'}
+        <button onclick="toggleCompanyStatus('${comp.id}', '${comp.status}')" class="text-xs px-3 py-1.5 rounded-lg border ${isActive ? 'border-rose-500/50 text-rose-400 hover:bg-rose-500/10' : 'border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10'} transition">
+          ${isActive ? 'Erişimi Dondur' : 'Aktif Et'}
         </button>
       </td>
     `;
     listElement.appendChild(row);
   });
 
-  document.getElementById('total-companies').innerText = companies.length;
-  document.getElementById('active-companies').innerText = activeCount;
-  document.getElementById('passive-companies').innerText = passiveCount;
+  const totalEl = document.getElementById('total-companies');
+  const activeEl = document.getElementById('active-companies');
+  const passiveEl = document.getElementById('passive-companies');
+
+  if (totalEl) totalEl.innerText = companies.length;
+  if (activeEl) activeEl.innerText = activeCount;
+  if (passiveEl) passiveEl.innerText = passiveCount;
 }
 
 // Şirket ve İlk Kullanıcıyı Oluşturma Formu
 document.getElementById('create-company-form')?.addEventListener('submit', async (e) => {
   e.preventDefault();
   
-  const compName = document.getElementById('comp-name').value;
-  const ownerName = document.getElementById('owner-name').value;
-  const ownerEmail = document.getElementById('owner-email').value;
-  const ownerPass = document.getElementById('owner-pass').value;
-  const role = document.getElementById('user-role').value;
+  const compName = document.getElementById('comp-name')?.value.trim();
+  const ownerName = document.getElementById('owner-name')?.value.trim();
+  const ownerEmail = document.getElementById('owner-email')?.value.trim();
+  const ownerPass = document.getElementById('owner-pass')?.value;
+  const role = document.getElementById('user-role')?.value;
+
+  if (!compName || !ownerEmail || !ownerPass) {
+    alert("Lütfen gerekli alanları doldurun.");
+    return;
+  }
 
   // 1. Şirketi Veritabanına Ekle
   const { data: company, error: compError } = await supabase
@@ -79,6 +92,8 @@ document.getElementById('create-company-form')?.addEventListener('submit', async
 
   if (authError) {
     alert("Kullanıcı oluşturulurken hata: " + authError.message);
+    // Temizlik: Oluşturulan şirketi geri sil
+    await supabase.from('companies').delete().eq('id', company.id);
     return;
   }
 
@@ -102,7 +117,7 @@ document.getElementById('create-company-form')?.addEventListener('submit', async
   loadCompanies();
 });
 
-// Şirket Dondurma / Aktif Etme İşlemi (Ödeme yapmayan müşteriyi durdurma)
+// Şirket Dondurma / Aktif Etme İşlemi
 async function toggleCompanyStatus(companyId, currentStatus) {
   const newStatus = currentStatus === 'active' ? 'suspended' : 'active';
   
@@ -123,9 +138,14 @@ async function toggleCompanyStatus(companyId, currentStatus) {
 document.getElementById('announcement-form')?.addEventListener('submit', async (e) => {
   e.preventDefault();
 
-  const title = document.getElementById('ann-title').value;
-  const content = document.getElementById('ann-content').value;
-  const endAt = document.getElementById('ann-end').value;
+  const title = document.getElementById('ann-title')?.value.trim();
+  const content = document.getElementById('ann-content')?.value.trim();
+  const endAt = document.getElementById('ann-end')?.value;
+
+  if (!title || !content || !endAt) {
+    alert("Lütfen tüm duyuru alanlarını ve bitiş tarihini doldurun.");
+    return;
+  }
 
   const { error } = await supabase
     .from('announcements')
@@ -142,11 +162,24 @@ document.getElementById('announcement-form')?.addEventListener('submit', async (
     return;
   }
 
-  alert("Duyuru başarıyla yayınlandı! Belirttiğin tarihe kadar müşterilerin ekranında görünecek.");
+  alert("Duyuru başarıyla yayınlandı!");
   document.getElementById('announcement-form').reset();
 });
 
-function logout() {
-  supabase.auth.signOut();
+// XSS Koruması için Yardımcı Fonksiyon
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/[&<>"']/g, (m) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  })[m]);
+}
+
+// Çıkış İşlemi
+async function logout() {
+  await supabase.auth.signOut();
   window.location.href = "index.html";
 }
