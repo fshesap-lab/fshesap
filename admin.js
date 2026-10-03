@@ -1,3 +1,46 @@
+// admin.js - Oturum ve Güvenlik Yönetimi
+
+// Sayfa yüklendiğinde oturum durumunu kontrol et
+document.addEventListener("DOMContentLoaded", async () => {
+  await checkAuth();
+});
+
+// Oturum Doğrulama Fonksiyonu
+async function checkAuth() {
+  const { data: { session }, error } = await supabase.auth.getSession();
+
+  if (error || !session) {
+    console.warn("Yetkisiz erişim denemesi! Giriş sayfasına yönlendiriliyor...");
+    // Oturum yoksa yönlendirilecek sayfa (örneğin index.html veya login.html)
+    window.location.href = "index.html"; 
+    return;
+  }
+
+  console.log("Oturum doğrulandı. Hoş geldiniz:", session.user.email);
+  // Oturum geçerliyse verileri yükle
+  initAdminDashboard(session.user);
+}
+
+// Çıkış Yap Fonksiyonu
+async function handleLogout() {
+  const { error } = await supabase.auth.signOut();
+  if (error) {
+    alert("Çıkış yapılırken bir hata oluştu: " + error.message);
+  } else {
+    window.location.href = "index.html";
+  }
+}
+
+// Admin Paneli Başlangıç Yüklemeleri
+function initAdminDashboard(user) {
+  // Kullanıcı bilgilerini arayüze yazdırma (varsa)
+  const userEmailEl = document.getElementById("admin-user-email");
+  if (userEmailEl) userEmailEl.textContent = user.email;
+
+  // Verileri çekme fonksiyonunu çağır (Bir sonraki adımda yazacağız)
+  loadDashboardData();
+}
+
 // Sayfa açıldığında şirketleri yükle
 document.addEventListener("DOMContentLoaded", () => {
   loadCompanies();
