@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>FSHesap - Ön Muhasebe Programı</title>
+  
+  <!-- Mobil & PWA Ayarları -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#2563eb">
+
+  <!-- Style & Supabase Kütüphaneleri -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-slate-100 font-sans antialiased text-gray-800">
+
+  <!-- GİRİŞ EKRANI -->
+  <div id="login-screen" class="min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 border border-slate-200">
+      
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-600 text-white font-bold text-2xl rounded-2xl mb-3 shadow-lg shadow-blue-500/30">
+          FS
+        </div>
+        <h1 class="text-2xl font-bold text-gray-900 tracking-tight">FSHesap</h1>
+        <p class="text-xs text-gray-500 mt-1">Hızlı ve Kolay Ön Muhasebe Sistemi</p>
+      </div>
+
+      <form id="login-form" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">E-Posta</label>
+          <input type="email" id="email" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:outline-none transition text-sm" placeholder="ornek@sirket.com">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Şifre</label>
+          <input type="password" id="password" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:outline-none transition text-sm" placeholder="••••••••">
+        </div>
+
+        <div class="flex items-center justify-between text-xs">
+          <label class="flex items-center cursor-pointer text-gray-600">
+            <input type="checkbox" id="remember-me" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+            <span class="ml-2">Beni Hatırla</span>
+          </label>
+        </div>
+
+        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl shadow-lg shadow-blue-500/30 transition duration-200 text-sm">
+          Giriş Yap
+        </button>
+      </form>
+
+      <div class="mt-8 pt-6 border-t border-gray-100 text-center">
+        <a href="mailto:info@fshesap.com?subject=FSHesap%20Hesap%20Talebi" class="inline-block text-xs text-blue-600 hover:underline font-medium">
+          Hesap detayları için lütfen sistem yetkilisi ile iletişime geçin
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
