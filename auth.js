@@ -10,36 +10,48 @@ document.addEventListener("DOMContentLoaded", () => {
       const errorEl = document.getElementById('login-error');
       const btn = document.getElementById('login-btn');
 
-      errorEl.classList.add('hidden');
+      if (errorEl) {
+        errorEl.classList.add('hidden');
+        errorEl.innerText = '';
+      }
       btn.innerText = "Giriş yapılıyor...";
       btn.disabled = true;
 
-      // Supabase Giriş İsteği
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: email,
-        password: password,
-      });
+      try {
+        // 1. Giriş yapma
+        const { data, error } = await supabaseApp.auth.signInWithPassword({
+          email: email,
+          password: password,
+        });
 
-      if (error) {
-        errorEl.innerText = "Giriş başarısız: " + error.message;
-        errorEl.classList.remove('hidden');
+        if (error) throw error;
+
+        // 2. Rol kontrolü yapma
+        const { data: profile, error: profileError } = await supabaseApp
+          .from('profiles')
+          .select('role')
+          .eq('id', data.user.id)
+          .maybeSingle();
+
+        if (profileError) console.error("Profil hatası:", profileError);
+
+        // 3. Yönlendirme
+        if (profile && profile.role === 'super_admin') {
+          window.location.href = "admin.html";
+        } else {
+          window.location.href = "dashboard.html";
+        }
+
+      } catch (err) {
+        console.error("Giriş Hatası:", err);
+        if (errorEl) {
+          errorEl.innerText = "Giriş Başarısız: " + (err.message || "E-posta veya şifre hatalı.");
+          errorEl.classList.remove('hidden');
+        } else {
+          alert("Giriş Başarısız: " + (err.message || "E-posta veya şifre hatalı."));
+        }
         btn.innerText = "Giriş Yap";
         btn.disabled = false;
-        return;
-      }
-
-      // Kullanıcının profilini ve rolünü sorgula
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', data.user.id)
-        .single();
-
-      // Rol kontrolüne göre yönlendirme
-      if (profile && profile.role === 'super_admin') {
-        window.location.href = "admin.html";
-      } else {
-        window.location.href = "dashboard.html";
       }
     });
   }
