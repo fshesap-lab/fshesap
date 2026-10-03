@@ -1,13 +1,5 @@
-// FSHesap Sistem Konfigürasyonu
-const CONFIG = {
-  appName: "FSHesap",
-  version: "1.0.0",
-  api: {
-    supabaseUrl: "https://jdqnjxacnwmmomvvwmxy.supabase.co",
-    supabaseAnonKey: "sb_publishable_X-Yddnv-jw86JsRJuyqXTO_i_piqZ9W"
-  },
-  supportEmail: "info@fshesap.com"
-};
+const SUPABASE_URL = "https://jdqnjxacnwmmomvvwmxy.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpkcW5qeGFjbndtbW9tdnZ3bXh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEwNjEwMjQsImV4cCI6MjEwNjYzNzAyNH0.FBIwh-OFeX-aAMkyG346VPI47mOtuECrkQw7PgpnlLM";
 
-// Supabase Bağlantısı
-const supabase = window.supabase.createClient(CONFIG.api.supabaseUrl, CONFIG.api.supabaseAnonKey);
+// Global çakışmaları önlemek için istemciyi 'supabaseClient' olarak tanımlıyoruz
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
