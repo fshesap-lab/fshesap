@@ -1,11 +1,15 @@
-ü<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FSHesap - Süper Admin Paneli</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Supabase Kütüphanesi -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Konfigürasyon ve Scriptler (defer eklendi) -->
+  <script src="config.js" defer></script>
+  <script src="admin.js" defer></script>
 </head>
 <body class="bg-gray-900 text-gray-100 font-sans min-h-screen">
 
@@ -96,7 +100,9 @@
               </tr>
             </thead>
             <tbody id="company-list" class="divide-y divide-gray-700">
-              <!-- JS ile dolacak -->
+              <tr>
+                <td colspan="4" class="p-4 text-center text-gray-400">Veriler yükleniyor...</td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -129,8 +135,5 @@
     </div>
 
   </main>
-
-  <script src="config.js"></script>
-  <script src="admin.js"></script>
 </body>
 </html>
